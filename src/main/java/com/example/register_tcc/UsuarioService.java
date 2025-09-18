@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioService {
@@ -26,44 +27,49 @@ public class UsuarioService {
     public Usuario registrarUsuario(Usuario usuario) {
         return usuarioRepository.save(usuario);
     }
-    
+
     public Optional<Usuario> login(String email, String senha) {
         return usuarioRepository.findByEmail(email)
             .filter(u -> u.getSenha().equals(senha));
     }
 
+    @Transactional
     public boolean iniciarRecuperacaoSenha(String email) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
-
         if (usuarioOpt.isEmpty()) {
-            return false;
+            return false; // email não encontrado
         }
 
         Usuario usuario = usuarioOpt.get();
 
-        String token = UUID.randomUUID().toString();
-        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(30);
+        try {
+            String token = UUID.randomUUID().toString();
+            LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(30);
 
-        PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(token);
-        resetToken.setUsuario(usuario);
-        resetToken.setExpiryDate(expiryDate);
+            PasswordResetToken resetToken = new PasswordResetToken();
+            resetToken.setToken(token);
+            resetToken.setUsuario(usuario);
+            resetToken.setExpiryDate(expiryDate);
 
-        passwordResetTokenRepository.save(resetToken);
+            passwordResetTokenRepository.save(resetToken);
 
-        String resetLink = "https://tccadaptative-my1u77npm-nexterzins-projects.vercel.app/reset-password?token=" + token;
-        emailService.enviarEmail(
-            usuario.getEmail(),
-            "Recuperação de Senha",
-            "Clique no link para redefinir sua senha: " + resetLink
-        );
+            String resetLink = "https://tccadaptative-my1u77npm-nexterzins-projects.vercel.app/reset-password?token=" + token;
+            emailService.enviarEmail(
+                usuario.getEmail(),
+                "Recuperação de Senha",
+                "Clique no link para redefinir sua senha: " + resetLink
+            );
 
-        return true;
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false; // evita 500
+        }
     }
 
+    @Transactional
     public boolean resetarSenha(String token, String novaSenha) {
         Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByToken(token);
-
         if (tokenOpt.isEmpty()) {
             return false;
         }
@@ -83,4 +89,3 @@ public class UsuarioService {
         return true;
     }
 }
-
