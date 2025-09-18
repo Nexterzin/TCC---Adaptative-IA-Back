@@ -1,6 +1,7 @@
 package com.example.register_tcc;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -12,12 +13,15 @@ public class Usuario {
 
     @Column(nullable = false)
     private String nome;
-    
+
     @Column(unique = true, nullable = false)
     private String email;
-    
+
     @Column(nullable = false)
     private String senha;
+
+    @Column(name = "data_criacao", nullable = false, updatable = false)
+    private LocalDateTime dataCriacao;
 
     // Construtor padrão (obrigatório para JPA)
     public Usuario() {}
@@ -27,6 +31,11 @@ public class Usuario {
         this.nome = nome;
         this.email = email;
         this.senha = senha;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        dataCriacao = LocalDateTime.now();
     }
 
     // Getters e setters
@@ -60,5 +69,9 @@ public class Usuario {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
     }
 }
