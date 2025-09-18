@@ -34,22 +34,29 @@ public class SecurityConfiguration {
    // Configura a política de CORS
     // Dentro de SecurityConfiguration.java
 
+// Dentro de SecurityConfiguration.java
+
 @Bean
 public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     
-    // ✅ Troque o "*" pela URL do seu front
+    // Lista de origens estáticas (sua URL de produção final)
     configuration.setAllowedOrigins(Arrays.asList("https://tccadaptativeia.vercel.app")); 
 
+    // ✅ A MÁGICA ESTÁ AQUI!
+    // Libera qualquer subdomínio de preview da Vercel para seus projetos
+    configuration.addAllowedOriginPattern("https://*-nexterzins-projects.vercel.app");
+
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("*")); // Liberar todos os headers é mais simples
-    configuration.setAllowCredentials(true); // Importante para alguns casos
+    configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setAllowCredentials(true);
     
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;
 }
 }
+
 
 
 
