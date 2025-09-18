@@ -30,20 +30,21 @@ public class SecurityConfiguration {
         return http.build();
     }
     
-    // Configura a política de CORS
+   // Configura a política de CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permite a origem do seu frontend Next.js.
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        // Permite os métodos HTTP que você usa (POST para registro).
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Permite os headers que o frontend envia.
-        configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
+
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+
+        configuration.setAllowedMethods(Arrays.asList("GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        configuration.setAllowedHeaders(Arrays.asList("Origin, X-Requested-With, Content-Type, Accept, authorization"));
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
+
 
