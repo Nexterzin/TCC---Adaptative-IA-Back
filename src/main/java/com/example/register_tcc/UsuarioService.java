@@ -9,75 +9,77 @@ import org.springframework.stereotype.Service;
 @Service
 public class UsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
-    private final EmailService emailService;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final EmailService emailService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public UsuarioService(
-        UsuarioRepository usuarioRepository,
-        EmailService emailService,
-        PasswordResetTokenRepository passwordResetTokenRepository
-    ) {
-        this.usuarioRepository = usuarioRepository;
-        this.emailService = emailService;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
-    }
+    public UsuarioService(
+        UsuarioRepository usuarioRepository,
+        EmailService emailService,
+        PasswordResetTokenRepository passwordResetTokenRepository
+    ) {
+        this.usuarioRepository = usuarioRepository;
+        this.emailService = emailService;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+    }
 
-    public Usuario registrarUsuario(Usuario usuario) {
-        return usuarioRepository.save(usuario);
-    }
+    public Usuario registrarUsuario(Usuario usuario) {
+        return usuarioRepository.save(usuario);
+    }
+    
+    public Optional<Usuario> login(String email, String senha) {
+        return usuarioRepository.findByEmail(email)
+            .filter(u -> u.getSenha().equals(senha));
+    }
 
-    public Optional<Usuario> login(String email, String senha) {
-        return usuarioRepository.findByEmail(email)
-                .filter(u -> u.getSenha().equals(senha));
-    }
+    public boolean iniciarRecuperacaoSenha(String email) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
 
-    public boolean iniciarRecuperacaoSenha(String email) {
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+        if (usuarioOpt.isEmpty()) {
+            return false;
+        }
 
-        if (usuarioOpt.isEmpty()) {
-            return false;
-        }
+        Usuario usuario = usuarioOpt.get();
 
-        Usuario usuario = usuarioOpt.get();
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(30);
 
-        // gera token
-        String token = UUID.randomUUID().toString();
-        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(30);
-        
-        PasswordResetToken resetToken = new PasswordResetToken(token, usuario, expiryDate);
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUsuario(usuario);
+        resetToken.setExpiryDate(expiryDate);
 
-        passwordResetTokenRepository.save(resetToken);
+        passwordResetTokenRepository.save(resetToken);
 
-        String resetLink = "http://localhost:3000/reset-password?token=" + token;
-        emailService.enviarEmail(
-            usuario.getEmail(),
-            "Recuperação de Senha",
-            "Clique no link para redefinir sua senha: " + resetLink
-        );
+        String resetLink = "http://localhost:3000/reset-password?token=" + token;
+        emailService.enviarEmail(
+            usuario.getEmail(),
+            "Recuperação de Senha",
+            "Clique no link para redefinir sua senha: " + resetLink
+        );
 
-        return true;
-    }
+        return true;
+    }
 
-    public boolean resetarSenha(String token, String novaSenha) {
-        Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByToken(token);
+    public boolean resetarSenha(String token, String novaSenha) {
+        Optional<PasswordResetToken> tokenOpt = passwordResetTokenRepository.findByToken(token);
 
-        if (tokenOpt.isEmpty()) {
-            return false;
-        }
+        if (tokenOpt.isEmpty()) {
+            return false;
+        }
 
-        PasswordResetToken resetToken = tokenOpt.get();
+        PasswordResetToken resetToken = tokenOpt.get();
 
-        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return false;
-        }
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return false;
+        }
 
-        Usuario usuario = resetToken.getUsuario();
-        usuario.setSenha(novaSenha);
-        usuarioRepository.save(usuario);
+        Usuario usuario = resetToken.getUsuario();
+        usuario.setSenha(novaSenha);
+        usuarioRepository.save(usuario);
 
-        passwordResetTokenRepository.delete(resetToken);
+        passwordResetTokenRepository.delete(resetToken);
 
-        return true;
-    }
+        return true;
+    }
 }
