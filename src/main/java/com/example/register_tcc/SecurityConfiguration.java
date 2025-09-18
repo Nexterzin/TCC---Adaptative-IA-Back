@@ -23,7 +23,7 @@ public class SecurityConfiguration {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configura CORS
             .authorizeHttpRequests(authorizeRequests ->
             authorizeRequests
-                .requestMatchers("/api/usuarios/resetar-senha", "/api/usuarios/registrar", "/api/usuarios/login", "/api/usuarios/recuperar-senha", "tccadaptativeia.vercel.app").permitAll()
+                .requestMatchers("/api/usuarios/**").permitAll()
                 .anyRequest().authenticated()
         );
 
@@ -49,6 +49,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     return source;
 }
 }
+
 
 
 
