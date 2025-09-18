@@ -24,14 +24,12 @@ public class SecurityConfiguration {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // ✅ Parte 2: Regras de Acesso (VERSÃO CORRETA)
             .authorizeHttpRequests(authorizeRequests ->
-                authorizeRequests
-                    // Libera as requisições de "permissão" do navegador
-                    .requestMatchers(HttpMethod.POST, "/api/usuarios/recuperar-senha").permitAll()
-                    // Libera todos os seus endpoints de usuário como públicos
-                    .requestMatchers("/api/usuarios/**").permitAll()
-                    // Exige autenticação para qualquer outra requisição no futuro
-                    .anyRequest().authenticated()
-            );
+    authorizeRequests
+        .requestMatchers(HttpMethod.POST, "/api/usuarios/recuperar-senha").permitAll() // ✅ Adicione esta linha
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+        .requestMatchers("/api/usuarios/**").permitAll() // Mantenha essa
+        .anyRequest().authenticated()
+);
 
         return http.build();
     }
@@ -57,4 +55,5 @@ public class SecurityConfiguration {
         return source;
     }
 }
+
 
