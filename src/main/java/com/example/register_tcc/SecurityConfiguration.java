@@ -23,7 +23,8 @@ public class SecurityConfiguration {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configura CORS
             .authorizeHttpRequests(authorizeRequests ->
             authorizeRequests
-                .requestMatchers("/api/usuarios/**").permitAll()
+                .requestMatchers("https://tccv1-git-master-nexterzins-projects.vercel.app",
+        "https://tccadaptativeia.vercel.app").permitAll()
                 .anyRequest().authenticated()
         );
 
@@ -49,6 +50,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     return source;
 }
 }
+
 
 
 
