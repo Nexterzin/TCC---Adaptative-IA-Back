@@ -31,20 +31,24 @@ public class SecurityConfiguration {
     }
     
    // Configura a política de CORS
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+    // Dentro de SecurityConfiguration.java
 
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    
+    // ✅ Troque o "*" pela URL do seu front
+    configuration.setAllowedOrigins(Arrays.asList("https://tccadaptativeia.vercel.app")); 
 
-        configuration.setAllowedMethods(Arrays.asList("GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        configuration.setAllowedHeaders(Arrays.asList("Origin, X-Requested-With, Content-Type, Accept, authorization"));
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("*")); // Liberar todos os headers é mais simples
+    configuration.setAllowCredentials(true); // Importante para alguns casos
+    
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
 }
+}
+
 
 
