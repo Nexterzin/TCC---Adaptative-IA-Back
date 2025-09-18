@@ -2,6 +2,7 @@ package com.example.register_tcc;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // ❗️ Importante adicionar este
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,45 +21,39 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configura CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // ✅ Parte 2: Regras de Acesso (VERSÃO CORRETA)
             .authorizeHttpRequests(authorizeRequests ->
-            authorizeRequests
-                .requestMatchers("https://tccv1-git-master-nexterzins-projects.vercel.app",
-        "https://tccadaptativeia.vercel.app").permitAll()
-                .anyRequest().authenticated()
-        );
+                authorizeRequests
+                    // Libera as requisições de "permissão" do navegador
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    // Libera todos os seus endpoints de usuário como públicos
+                    .requestMatchers("/api/usuarios/**").permitAll()
+                    // Exige autenticação para qualquer outra requisição no futuro
+                    .anyRequest().authenticated()
+            );
 
         return http.build();
     }
     
-   // Configura a política de CORS
-    // Dentro de SecurityConfiguration.java
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        // ✅ Parte 1: Configuração de CORS (A sua já estava PERFEITA!)
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        configuration.setAllowedOrigins(Arrays.asList(
+            "https://tccadaptativeia.vercel.app",
+            "https://tccv1-git-master-nexterzins-projects.vercel.app"
+        )); 
+        
+        configuration.addAllowedOriginPattern("https://*-nexterzins-projects.vercel.app");
 
-// Dentro de SecurityConfiguration.java
-
-@Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    
-    // Lista de origens estáticas (sua URL de produção final)
-    configuration.setAllowedOrigins(Arrays.asList("https://tccadaptativeia.vercel.app")); 
-
-    // ✅ A MÁGICA ESTÁ AQUI!
-    // Libera qualquer subdomínio de preview da Vercel para seus projetos
-    configuration.addAllowedOriginPattern("https://*-nexterzins-projects.vercel.app");
-
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("*"));
-    configuration.setAllowCredentials(true);
-    
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }
-}
-
-
-
-
-
-
