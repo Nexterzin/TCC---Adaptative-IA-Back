@@ -26,7 +26,7 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authorizeRequests ->
                 authorizeRequests
                     // Libera as requisições de "permissão" do navegador
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/usuarios/recuperar-senha").permitAll()
                     // Libera todos os seus endpoints de usuário como públicos
                     .requestMatchers("/api/usuarios/**").permitAll()
                     // Exige autenticação para qualquer outra requisição no futuro
@@ -57,3 +57,4 @@ public class SecurityConfiguration {
         return source;
     }
 }
+
