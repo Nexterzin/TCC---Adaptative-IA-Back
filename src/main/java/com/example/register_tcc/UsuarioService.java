@@ -13,15 +13,18 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final EmailService emailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PasswordResetTokenService passwordResetTokenService;
 
     public UsuarioService(
         UsuarioRepository usuarioRepository,
         EmailService emailService,
-        PasswordResetTokenRepository passwordResetTokenRepository
+        PasswordResetTokenRepository passwordResetTokenRepository,
+        PasswordResetTokenService passwordResetTokenService
     ) {
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.passwordResetTokenService = passwordResetTokenService;
     }
 
     public Usuario registrarUsuario(Usuario usuario) {
@@ -46,12 +49,8 @@ public class UsuarioService {
             String token = UUID.randomUUID().toString();
             LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(30);
 
-            PasswordResetToken resetToken = new PasswordResetToken();
-            resetToken.setToken(token);
-            resetToken.setUsuario(usuario);
-            resetToken.setExpiryDate(expiryDate);
-
-            passwordResetTokenRepository.save(resetToken);
+            // 👉 agora cria ou atualiza em vez de sempre tentar inserir
+            passwordResetTokenService.criarOuAtualizarToken(usuario, token, expiryDate);
 
             String resetLink = "https://tccadaptative-my1u77npm-nexterzins-projects.vercel.app/reset-password?token=" + token;
             emailService.enviarEmail(
