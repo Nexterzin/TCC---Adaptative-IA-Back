@@ -1,24 +1,42 @@
 package com.example.register_tcc;
 
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
-
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
+    @Value("${SENDGRID_API_KEY}")
+    private String sendGridApiKey;
 
     public void enviarEmail(String para, String assunto, String texto) {
-        SimpleMailMessage mensagem = new SimpleMailMessage();
-        mensagem.setTo(para);
-        mensagem.setSubject(assunto);
-        mensagem.setText(texto);
-        mensagem.setFrom("predicaodiabete@outlook.com"); 
-        mailSender.send(mensagem);
+        Email from = new Email("contato@predicaodiabete.xyz"); // Mude para o seu e-mail de remetente autenticado
+        Email to = new Email(para);
+        Content content = new Content("text/plain", texto);
+        Mail mail = new Mail(from, assunto, to, content);
+
+        SendGrid sg = new SendGrid(sendGridApiKey);
+        Request request = new Request();
+
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            System.out.println(response.getStatusCode());
+            System.out.println(response.getBody());
+            System.out.println(response.getHeaders());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 }
