@@ -52,7 +52,7 @@ public class UsuarioService {
             // 👉 agora cria ou atualiza em vez de sempre tentar inserir
             passwordResetTokenService.criarOuAtualizarToken(usuario, token, expiryDate);
 
-            String resetLink = "https://tccadaptative-my1u77npm-nexterzins-projects.vercel.app/reset-password?token=" + token;
+            String resetLink = "https://tccadaptativeia.vercel.app/reset-password?token=" + token;
             emailService.enviarEmail(
                 usuario.getEmail(),
                 "Recuperação de Senha",
@@ -87,4 +87,5 @@ public class UsuarioService {
 
         return true;
     }
+
 }
