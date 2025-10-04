@@ -16,8 +16,15 @@ public class UsuarioController {
     }
 
     @PostMapping("/registrar")
-    public Usuario registrar(@RequestBody Usuario usuario) {
-        return usuarioService.registrarUsuario(usuario);
+    public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
+        try {
+            Usuario novoUsuario = usuarioService.registrarUsuario(usuario);
+            return ResponseEntity.ok(novoUsuario);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                .status(400)
+                .body(Map.of("message", e.getMessage()));
+        }
     }
     
     @PostMapping("/login")
@@ -28,22 +35,22 @@ public class UsuarioController {
     }
 
     @PostMapping("/recuperar-senha")
-    public ResponseEntity<String> recuperarSenha(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String,String>> recuperarSenha(@RequestBody Map<String, String> request) {
         String email = request.get("email");
 
         if (email == null || email.isEmpty()) {
-            return ResponseEntity.badRequest().body("E-mail é obrigatório.");
+            return ResponseEntity.badRequest().body(Map.of("message", "E-mail é obrigatório."));
         }
 
         boolean sucesso = usuarioService.iniciarRecuperacaoSenha(email);
 
         if (sucesso) {
-            return ResponseEntity.ok("E-mail de recuperação enviado.");
+            return ResponseEntity.ok(Map.of("message", "E-mail de recuperação enviado."));
         } else {
-            return ResponseEntity.status(404).body("E-mail não encontrado.");
+            return ResponseEntity.status(404).body(Map.of("message", "E-mail não encontrado."));
         }
     }
- // DTO para receber token + nova senha
+
     public static class ResetSenhaRequest {
         private String token;
         private String novaSenha;
