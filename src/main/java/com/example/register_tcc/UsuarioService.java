@@ -28,6 +28,10 @@ public class UsuarioService {
     }
 
     public Usuario registrarUsuario(Usuario usuario) {
+        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
+            throw new RuntimeException("E-mail já cadastrado");
+        }
+
         return usuarioRepository.save(usuario);
     }
 
@@ -87,5 +91,4 @@ public class UsuarioService {
 
         return true;
     }
-
 }
