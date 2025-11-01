@@ -87,13 +87,14 @@ public class UsuarioController {
             
             return ResponseEntity.ok(resultadoIA);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("message", "Erro ao ler o arquivo PDF."));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (RuntimeException e) {
             return ResponseEntity.status(500).body(Map.of("message", "Ocorreu um erro interno no servidor: " + e.getMessage()));
-        }
+       } catch (IOException e) {
+           e.printStackTrace();
+           return ResponseEntity.status(500).body(Map.of("message", "Erro ao ler o arquivo PDF."));
+       } catch (Exception e) {
+           e.printStackTrace();
+           return ResponseEntity.status(500).body(Map.of("message", "Ocorreu um erro interno no servidor: " + e.getMessage()));
+       }
     }
-
 }
