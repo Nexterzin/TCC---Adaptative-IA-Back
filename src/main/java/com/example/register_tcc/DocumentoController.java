@@ -18,4 +18,9 @@ public class DocumentoController {
     public RedirectView downloadMedioRisco() {
         return new RedirectView("/documentos/Diabetes_Moderada_Baixa.pdf");
     }
+    
+    @GetMapping("/orientacao-prevencao")
+    public RedirectView downloadPrevencao() {
+        return new RedirectView("/documentos/Diabetes_Prevencao.pdf");
+    }
 }
