@@ -4,6 +4,8 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -11,9 +13,13 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    private final PdfProcessingService pdfProcessingService; 
+
+    public UsuarioController(UsuarioService usuarioService, PdfProcessingService pdfProcessingService) {
         this.usuarioService = usuarioService;
+        this.pdfProcessingService = pdfProcessingService;
     }
+
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
@@ -67,6 +73,26 @@ public class UsuarioController {
             return ResponseEntity.ok("Senha redefinida com sucesso.");
         } else {
             return ResponseEntity.status(400).body("Token inválido ou expirado.");
+        }
+    }
+    
+    @PostMapping("/analisar-laudo")
+    public ResponseEntity<?> analisarLaudo(@RequestParam("arquivo") MultipartFile arquivo) {
+        if (arquivo.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "O arquivo não pode ser vazio."));
+        }
+
+        try {
+            String resultadoIA = pdfProcessingService.processarPdfEChamarIA(arquivo);
+            
+            return ResponseEntity.ok(resultadoIA);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Erro ao ler o arquivo PDF."));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Ocorreu um erro interno no servidor: " + e.getMessage()));
         }
     }
 
